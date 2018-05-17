@@ -4,8 +4,8 @@ var serialPort = new SerialPort("COM1", { baudRate: 115200 });
 
 
 var clientTokenUpdate;
-var sessionid = 0;
-var local_sessionid = 0;//tam thoi
+var sessionidnumber;
+var local_sessionid = "46";//tam thoi
 
 var thingShadows = awsIot.thingShadow({
    keyPath: './certs/ef21fe66d7-private.pem.key',
@@ -30,6 +30,7 @@ var buffer = {
     }
   }
 
+
 // lang nghe thingShadow
 
 thingShadows.on('delta',
@@ -37,8 +38,11 @@ thingShadows.on('delta',
        console.log('SSID: '+ JSON.stringify(stateObject.state.Data.container.sessionid)); // dang string
        console.log('SSID2: '+ stateObject.state.Data.container.sessionid); // dang json
        sessionid = stateObject.state.Data.container.sessionid;
-       console.log(typeof(sessionid));
-       if(sessionid === null)
+       sessionidnumber = Number(sessionid);
+       sessionidnumber = sessionidnumber + 1;
+       buffer.container.sessionid = sessionidnumber;
+
+       if(sessionid == null)
        {
          console.log("Error: SSID rong~");
        }
@@ -48,8 +52,6 @@ thingShadows.on('delta',
             // convent
             serialPort.write('@')
 
-            //console.log(buffer.container.device);
-            //console.log(buffer.container.id);
 
             if (stateObject.state.Data.container.device == 'Light') {
               serialPort.write('L')
@@ -203,6 +205,7 @@ function onData(data){
         break;
     }
   }
+
   var updateshadow = {"state":{"desired":{"Data": buffer}}}
     clientToken = thingShadows.update('Thang-Test', updateshadow);
 
